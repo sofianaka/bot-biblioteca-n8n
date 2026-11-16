@@ -1,0 +1,194 @@
+{
+  "name": "LibrarySofi",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5d182ca3-45b3-4a44-9036-8a2abb43c0ab",
+      "name": "Telegram Trigger",
+      "webhookId": "d6760da9-5945-4105-a52d-26590efb9047",
+      "credentials": {
+        "telegramApi": {
+          "id": "CxeP9zD7iYdMLrqy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Você é a atendente virtual da Biblioteca LibrarySofi, em Belém.\nResponda em português, de forma simpática e curta (no máximo 3 frases).\n\nInformações da biblioteca:\n- Funcionamento: segunda a sexta, 8h às 20h; sábado, 9h às 13h.\n- Cadastro: grátis, no balcão, com documento com foto e comprovante de residência.\n- Empréstimo: até 3 livros por vez, por 14 dias.\n- Renovação: 1 vez por mais 14 dias, no balcão ou pelo telefone (91) 0000-0000.\n- Atraso: multa de R$ 1 por dia, por livro.\n- Wi-Fi e salas de estudo: grátis para leitores cadastrados.\n\nRegras:\n- Use apenas as informações acima. Se não souber, diga que não tem essa informação e indique o telefone da biblioteca.\n- Você não tem acesso ao catálogo. Se perguntarem se um livro específico está disponível, diga que não consegue consultar e indique o balcão ou o telefone.\n- Se perguntarem algo que não tem a ver com a biblioteca, diga com educação que só pode ajudar com dúvidas sobre a LibrarySofi.\n- Nunca invente horários, regras, valores ou livros."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5c30ca11-4f72-4b42-b8f7-7f076f2fc8e8",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        208
+      ],
+      "id": "bfe18190-95b3-40f5-af2d-64ce8839a8b1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "5jXWKTzw5x1SAufe",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        368,
+        224
+      ],
+      "id": "927ce3ad-69ab-4fa1-b5a4-6fd734d9310e",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "95c562d0-8f21-4cf1-a57f-9339a301cff6",
+      "name": "Send a text message",
+      "webhookId": "0b457c44-f39c-4899-a170-49a7037ca2fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "CxeP9zD7iYdMLrqy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        240
+      ],
+      "id": "a8ff187e-5797-4704-b8d5-0ca627e38fab",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "5jXWKTzw5x1SAufe",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8522dab5-c8aa-4262-936b-1e15bcb63027",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "PLBPoFcN7coXyWps",
+  "tags": []
+}

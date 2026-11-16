@@ -1,0 +1,20 @@
+# Sobe o n8n no endereço http://localhost:5678
+# Como usar:  docker compose up -d
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=America/Belem
+      - TZ=America/Belem
+      # Endereço público (HTTPS) do n8n. O Telegram precisa dele pra entregar as mensagens.
+      - WEBHOOK_URL=${WEBHOOK_URL}
+    volumes:
+      # Os fluxos e as credenciais ficam guardados neste volume
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

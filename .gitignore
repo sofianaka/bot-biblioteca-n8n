@@ -1,0 +1,6 @@
+# variáveis reais (endereços, senhas) nunca vão pro repositório
+.env
+
+# dados locais do n8n, se forem copiados pra cá
+n8n_data/
+.n8n/
